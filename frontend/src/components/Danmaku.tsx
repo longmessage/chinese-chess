@@ -9,7 +9,6 @@ interface Danmaku {
 }
 
 interface DanmakuProps {
-  
   username: string
   isVisible: boolean
 }
@@ -24,7 +23,6 @@ export default function Danmaku({ username, isVisible }: DanmakuProps) {
   const [inputText, setInputText] = useState('')
   const [isDanmakuOn, setIsDanmakuOn] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
 
   // 模拟收到弹幕
   useEffect(() => {
@@ -39,13 +37,13 @@ export default function Danmaku({ username, isVisible }: DanmakuProps) {
         ]
         
         const newDanmaku: Danmaku = {
-          id: Date.now().toString(),
+          id: Date.now().toString() + Math.random(),
           text: randomMessages[Math.floor(Math.random() * randomMessages.length)],
           color: COLORS[Math.floor(Math.random() * COLORS.length)],
           username: randomNames[Math.floor(Math.random() * randomNames.length)]
         }
         
-        setMessages(prev => [...prev.slice(-20), newDanmaku])
+        setMessages(prev => [...prev.slice(-15), newDanmaku])
       }
     }, 2000)
 
@@ -62,7 +60,7 @@ export default function Danmaku({ username, isVisible }: DanmakuProps) {
       username: username
     }
 
-    setMessages(prev => [...prev.slice(-20), newDanmaku])
+    setMessages(prev => [...prev.slice(-15), newDanmaku])
     setInputText('')
   }
 
@@ -75,14 +73,19 @@ export default function Danmaku({ username, isVisible }: DanmakuProps) {
   if (!isVisible) return null
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* 弹幕显示区域 */}
       <div 
         ref={containerRef}
-        className="relative h-16 bg-black/30 rounded-lg overflow-hidden border border-chinese-gold/20"
+        className="relative h-10 bg-black/40 rounded-lg overflow-hidden border border-chinese-gold/20"
       >
+        {messages.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center text-chinese-white/30 text-xs">
+            发送弹幕与其他玩家互动
+          </div>
+        )}
         <AnimatePresence>
-          {messages.slice(-10).map((msg) => (
+          {messages.slice(-5).map((msg) => (
             <motion.div
               key={msg.id}
               initial={{ x: '100%', opacity: 0 }}
@@ -90,48 +93,46 @@ export default function Danmaku({ username, isVisible }: DanmakuProps) {
               exit={{ opacity: 0 }}
               transition={{ duration: 8, ease: 'linear' }}
               className="absolute top-1/2 -translate-y-1/2 whitespace-nowrap"
-              style={{ color: msg.color, left: '100%' }}
+              style={{ 
+                color: msg.color, 
+                left: '100%',
+                fontSize: '12px',
+                textShadow: '1px 1px 2px black'
+              }}
             >
-              <span className="text-sm font-bold">{msg.username}: </span>
+              <span className="font-bold">{msg.username}: </span>
               <span>{msg.text}</span>
             </motion.div>
           ))}
         </AnimatePresence>
-
-        {messages.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-chinese-white/30 text-sm">
-            弹幕显示区域
-          </div>
-        )}
       </div>
 
       {/* 发送弹幕 */}
       <div className="flex gap-2">
         <input
-          ref={inputRef}
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="发送弹幕..."
-          className="flex-1 bg-black/30 border border-chinese-gold/30 rounded-lg px-4 py-2 text-white placeholder:text-chinese-white/30"
+          placeholder="发弹幕..."
+          className="flex-1 bg-black/40 border border-chinese-gold/30 rounded px-3 py-1.5 text-white text-sm placeholder:text-chinese-white/30"
           maxLength={20}
         />
         <button
           onClick={sendDanmaku}
-          className="px-4 py-2 bg-chinese-red/20 text-chinese-red rounded-lg border border-chinese-red/50 hover:bg-chinese-red/30"
+          className="px-3 py-1.5 bg-chinese-red/20 text-chinese-red rounded-lg border border-chinese-red/50 hover:bg-chinese-red/30 text-sm"
         >
           发送
         </button>
         <button
           onClick={() => setIsDanmakuOn(!isDanmakuOn)}
-          className={`px-4 py-2 rounded-lg border ${
+          className={`px-3 py-1.5 rounded-lg border text-sm ${
             isDanmakuOn 
               ? 'bg-chinese-gold/20 text-chinese-gold border-chinese-gold/50' 
-              : 'bg-black/30 text-chinese-white/50 border-chinese-white/20'
+              : 'bg-black/40 text-chinese-white/50 border-chinese-white/20'
           }`}
         >
-          {isDanmakuOn ? '🎬' : '📴'}
+          {isDanmakuOn ? '📝' : '📴'}
         </button>
       </div>
     </div>
